@@ -1,0 +1,56 @@
+version: '3.9'
+
+networks:
+  backend:
+    name: reseau-backend
+  frontend:
+    name: reseau-frontend
+
+services:
+  mysql:
+    image: mysql:latest
+    ports:
+      - 3306:3306
+    environment:
+      MYSQL_ROOT_PASSWORD: ${USER_PASS}
+      MYSQL_DATABASE: testdb
+    networks:
+      - backend
+    volumes:
+      - D:\Documents\YNOV\CONTENEURISATION\volumes\mysql:/var/lib/mysql
+
+  phpmyadmin:
+    image: phpmyadmin:latest
+    ports:
+      - 8080:80
+    environment:
+      PMA_PORT: 3306
+      MYSQL_ROOT_PASSWORD: ${USER_PASS}
+      PMA_HOST: ${DB_NAME}
+    depends_on:
+      - mysql
+    networks:
+      - backend
+      - frontend
+
+  wordpress:
+    image: wordpress:latest
+    volumes:
+      - D:\Documents\YNOV\CONTENEURISATION\volumes\wordpress:/var/www/html
+    ports:
+      - 5001:80
+    environment:
+      WORDPRESS_DB_HOST: mysql
+      WORDPRESS_DB_USER: ${USER_NAME}
+      WORDPRESS_DB_PASSWORD: ${USER_PASS}
+      WORDPRESS_DB_NAME: ${DB_NAME}
+    depends_on:
+      - mysql
+    networks:
+      - backend
+      - frontend
+
+  pink:
+    build: /helloworld
+    ports:
+      - 5665:80
